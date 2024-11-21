@@ -1,0 +1,248 @@
+openapi: 3.0.0
+info:
+  title: Notes and Users API
+  description: API endpoints for managing notes and user accounts
+  version: 1.0.0
+tags:
+  - name: Notes
+    description: API endpoints for managing notes
+  - name: Users
+    description: API endpoints for user account management
+
+paths:
+  /api/notes:
+    get:
+      summary: Get all notes for a user
+      tags:
+        - Notes
+      responses:
+        200:
+          description: List of notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Note"
+        404:
+          description: Notes not found
+
+  /api/notes/getNote/{nid}:
+    get:
+      summary: Get a specific note for a user
+      tags:
+        - Notes
+      parameters:
+        - in: path
+          name: nid
+          required: true
+          schema:
+            type: string
+          description: Note ID
+      responses:
+        200:
+          description: A specific note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+        404:
+          description: Note not found
+
+  /api/notes/create:
+    post:
+      summary: Create a new note
+      tags:
+        - Notes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Note"
+      responses:
+        201:
+          description: Note created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+        422:
+          description: Invalid input
+
+  /api/notes/{nid}:
+    patch:
+      summary: Update a note
+      tags:
+        - Notes
+      parameters:
+        - in: path
+          name: nid
+          required: true
+          schema:
+            type: string
+          description: Note ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Note"
+      responses:
+        200:
+          description: Note updated
+        404:
+          description: Note not found
+
+    delete:
+      summary: Delete a note
+      tags:
+        - Notes
+      parameters:
+        - in: path
+          name: nid
+          required: true
+          schema:
+            type: string
+          description: Note ID
+      responses:
+        200:
+          description: Note deleted
+        404:
+          description: Note not found
+
+  /api/notes/{nid}/share:
+    post:
+      summary: Share a note with another user
+      tags:
+        - Notes
+      parameters:
+        - in: path
+          name: nid
+          required: true
+          schema:
+            type: string
+          description: Note ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sharedWith:
+                  type: string
+                  description: User ID of the user to share the note with
+      responses:
+        200:
+          description: Note shared successfully
+        404:
+          description: User or note not found
+
+  /api/notes/search:
+    get:
+      summary: Search notes by query
+      tags:
+        - Notes
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+            description: The search query to filter notes
+      responses:
+        200:
+          description: A list of notes matching the query
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Note"
+        400:
+          description: Bad request if the query parameter is missing or invalid
+        500:
+          description: Internal server error
+
+  /api/users/signup:
+    post:
+      summary: User signup
+      description: Creates a new user account with email and password.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        201:
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        422:
+          description: Invalid input data.
+
+  /api/users/login:
+    post:
+      summary: User login
+      description: Authenticates a user with email and password.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        200:
+          description: User logged in successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    description: ID of the user.
+                  email:
+                    type: string
+                    description: Email of the user.
+                  token:
+                    type: string
+                    description: JWT token.
+        401:
+          description: Invalid email or password.
+
+components:
+  schemas:
+    Note:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The note ID
+        title:
+          type: string
+          description: The title of the note
+        content:
+          type: string
+          description: The content of the note
+        userId:
+          type: string
+          description: The ID of the user who created the note
+
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+          description: User's email address
+        password:
+          type: string
+          description: User's password
